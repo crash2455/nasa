@@ -6,7 +6,7 @@ var apod = {
       (end.getTime() - start.getTime())
     );
 
-    //let date = new Date(2013,5,6);
+    date = new Date(2013,5,6);
 
     //Format Date
     let d = date.getDate();
@@ -24,19 +24,24 @@ var apod = {
     return `${y}-${m}-${d}`;
   },
   buildDOM: function(result) {
-    $("#apodTitle").text(result.title);
+    document.getElementById("apodTitle").innerHTML= result.title;
+    var image = document.getElementById("apodImg");
+    var video = document.getElementById("apodVideo");
 
     if(result.media_type === 'video') {
-      $("#apodImage").hide();
-      $("#apodVideo > iframe").attr("src", result.url).show();
+      image.style.display = "none";
+      document.querySelector("#apodVideo > iframe").src= result.url;
+      video.style.display = "visible";
+
     }else{
-      $("#apodVideo").hide();
-      $("#apodImg").attr("src", result.url).attr('alt', result.title).show();
+      video.style.display = "none";
+      image.src = result.url;
+      image.style.display = "visible";
     }
 
-    $("#apodCopyright").text("Copyright: " + result.copyright);
-    $("#apodDate").text("Date: " + result.date);
-    $("#apodDesc").text(result.explanation);
+    document.getElementById("apodCopyright").innerHTML = ("Copyright: " + result.copyright);
+    document.getElementById("apodDate").innerHTML = ("Date: " + result.date);
+    document.getElementById("apodDesc").innerHTML = (result.explanation);
   },
 
   //Executes an AJAX call to an API.
@@ -44,13 +49,15 @@ var apod = {
     let _this = this;
     let date = this.randomDate(new Date(1995, 5, 16), new Date());
     let url = "https://api.nasa.gov/planetary/apod?api_key=LcGRMR8ReXp7B91eLkhqcSag0JYHQKh2Y5MAAXHY&date=" + date;
-    $.ajax({
-        url: url
-    }).done(function(result){
-        _this.buildDOM(result);
-    }).fail(function(result){
+    var xhr = new XMLHttpRequest();
+    xhr.open('Get',url);
+    xhr.send();
+    xhr.onload= function(){
+      let result = JSON.parse(xhr.response);
+
       console.log(result);
-    });
+      _this.buildDOM(result);
+    }
   },
   // Application Constructor
   init: function() {
@@ -59,8 +66,6 @@ var apod = {
 };
 apod.init();
 
-$(function(){
-  $('#btnRandApod').on('click',function(){
-    apod.getRequest();
-  });
-});
+document.getElementById('btnRandApod').onclick = function(){
+  apod.getRequest();
+};
